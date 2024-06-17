@@ -14,6 +14,7 @@ class Planet:
         self.color = pygame.color.Color("red") if color is None else color
         self.mass = mass
         self.frozen = False
+        self.exists = True
 
     def get_pos(self) -> pygame.Vector2:
         return self.pos
@@ -41,6 +42,13 @@ class Planet:
             # depois a posição
             self.pos += self.get_velocity()
 
+    def update_click(self, state, click=False):
+        mouse_pos = pygame.mouse.get_pos()
+
+        if state == 1 and click:
+            if (mouse_pos[0]-self.pos.x)**2 + (mouse_pos[1] - self.pos.y)**2 < self.radius**2:
+                self.exists = False
+
     def update_collision(self, others: list | tuple = None):
         if not others:
             return
@@ -51,7 +59,6 @@ class Planet:
 
             distance = self.pos.distance_to(other.pos)
             if distance < self.radius + other.radius:
-                print('ooh')
                 self.freeze_self()
                 other.freeze_self()
 

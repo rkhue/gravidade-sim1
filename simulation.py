@@ -1,19 +1,24 @@
 from random import randint, uniform
 import numpy as np
+import pygame.mouse
+
 from planet import *
 import sys
 
 MAX_ACCELERATION = 10
 
 pygame.init()
-SX, SY = (1920, 1080)
+SX, SY = (1420, 680)
 
 clamp = lambda n, minn, maxn: max(min(maxn, n), minn)
 
+FONT = pygame.font.SysFont('Roboto', 30)
 
-def random_planet(x):
+
+def random_planet(x, pos=None):
+    pos = pygame.Vector2(randint(0, SX), randint(0, SY)) if pos is None else pos
     for i in range(x):
-        yield Planet(pygame.Vector2(randint(0, SX), randint(0, SY)),
+        yield Planet(pos,
                      radius=randint(10, 100),
                      mass=randint(1, 1),
                      acceleration=pygame.Vector2(uniform(-1, 1) / 10000))
@@ -21,23 +26,57 @@ def random_planet(x):
 
 class Simulation:
     def __init__(self):
-        self.planets: list[Planet] = list(random_planet(2))
+        self.planets: list[Planet] = list()
         self.screen = pygame.display.set_mode((SX, SY))
+        pygame.display.set_caption("Planetas")
+        self.states = {0: "ADD", 1: "DELETE"}
+        self.state = 0
+
+    def flip_state(self):
+        self.state += 1
+        if self.state not in self.states:
+            self.state = 0
+
+    def draw_text(self):
+        render = FONT.render(self.states[self.state], False, pygame.color.Color('yellow'))
+        self.screen.blit(render, (0, 0))
 
     def mainloop(self):
+        click = False
+
         while True:
             self.screen.fill((0, 0, 0))
+            self.draw_text()
+
             for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.update_click()
+                    click = True
+
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_t:
+                        self.flip_state()
+
             # desenhando e atualizando os planetas
-            for planet in self.planets:
+            for planet in list(self.planets):
+                if not planet.exists:
+                    del self.planets[self.planets.index(planet)]
+
                 planet.blit(self.screen)
                 planet.update(self.planets)
+                planet.update_click(self.state, click)
 
             self.update()
             pygame.display.flip()
+
+    def update_click(self):
+        mouse_pos = pygame.mouse.get_pos()
+
+        self.planets.extend(list(random_planet(1, pygame.Vector2(mouse_pos))))
 
     def update(self):
         for obj in self.planets:
