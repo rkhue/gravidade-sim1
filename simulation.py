@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 import numpy as np
 from planet import *
 import sys
@@ -13,7 +13,10 @@ clamp = lambda n, minn, maxn: max(min(maxn, n), minn)
 
 def random_planet(x):
     for i in range(x):
-        yield Planet(pygame.Vector2(randint(0, SX), randint(0, SY)), radius=randint(10, 100), mass=randint(1, 10))
+        yield Planet(pygame.Vector2(randint(0, SX), randint(0, SY)),
+                     radius=randint(10, 100),
+                     mass=randint(1, 1),
+                     acceleration=pygame.Vector2(uniform(-1, 1) / 10000))
 
 
 class Simulation:
