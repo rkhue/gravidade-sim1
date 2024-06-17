@@ -2,13 +2,18 @@ import pygame
 
 
 class Planet:
-    def __init__(self, pos: pygame.Vector2, radius=100, mass=10, velocity: pygame.Vector2 = None,
+    def __init__(self, pos: pygame.Vector2, color: pygame.Color = None,
+                 radius=100, mass=10,
+                 velocity: pygame.Vector2 = None,
                  acceleration: pygame.Vector2 = None):
+
         self.pos = pos
         self.velocity = velocity if velocity else pygame.Vector2()
         self.acceleration = acceleration if acceleration else pygame.Vector2()
         self.radius = radius
+        self.color = pygame.color.Color("red") if color is None else color
         self.mass = mass
+        self.frozen = False
 
     def get_pos(self) -> pygame.Vector2:
         return self.pos
@@ -25,11 +30,34 @@ class Planet:
     def get_radius(self):
         return self.radius
 
-    def update(self):
-        # primeiro atualizando a velocidade
-        self.velocity += self.get_acceleration()
-        # depois a posição
-        self.pos += self.get_velocity()
+    def get_color(self) -> pygame.Color:
+        return self.color
+
+    def update(self, others: list = None):
+        if not self.frozen:
+            self.update_collision(others)
+            # primeiro atualizando a velocidade
+            self.velocity += self.get_acceleration()
+            # depois a posição
+            self.pos += self.get_velocity()
+
+    def update_collision(self, others: list | tuple = None):
+        if not others:
+            return
+
+        for other in others:
+            if other == self:
+                continue
+
+            distance = self.pos.distance_to(other.pos)
+            if distance < self.radius + other.radius:
+                print('ooh')
+                self.freeze_self()
+                other.freeze_self()
+
+    def freeze_self(self):
+        self.frozen = True
+        self.color = pygame.color.Color("green")
 
     def blit(self, screen):
-        pygame.draw.circle(screen, pygame.color.Color("red"), self.get_pos(), int(self.radius))
+        pygame.draw.circle(screen, self.get_color(), self.get_pos(), int(self.radius))
