@@ -5,12 +5,20 @@ import pygame.mouse
 from planet import *
 import sys
 
-MAX_ACCELERATION = 10
+MAX_ACCELERATION = 0.01
+MAX_SPEED = 4
 
 pygame.init()
 SX, SY = (1420, 680)
 
-clamp = lambda n, minn, maxn: max(min(maxn, n), minn)
+
+def clamp(n, x, y):
+    if n < x:
+        return x
+    elif n > y:
+        return y
+    return n
+
 
 FONT = pygame.font.SysFont('Roboto', 30)
 
@@ -19,9 +27,9 @@ def random_planet(x, pos=None):
     pos = pygame.Vector2(randint(0, SX), randint(0, SY)) if pos is None else pos
     for i in range(x):
         yield Planet(pos,
-                     radius=randint(10, 100),
+                     radius=randint(10, 50),
                      mass=randint(1, 1),
-                     acceleration=pygame.Vector2(uniform(-1, 1) / 10000))
+                     acceleration=pygame.Vector2(uniform(-0.2, 0.2) / 10000))
 
 
 class Simulation:
@@ -90,3 +98,7 @@ class Simulation:
 
                 obj.acceleration.x += clamp(obj.mass * ((bx - ox) * mag) * -1, -MAX_ACCELERATION, MAX_ACCELERATION)
                 obj.acceleration.y += clamp(obj.mass * ((by - oy) * mag) * -1, -MAX_ACCELERATION, MAX_ACCELERATION)
+
+                obj.velocity.x = clamp(obj.velocity.x, -MAX_SPEED, MAX_SPEED)
+                obj.velocity.y = clamp(obj.velocity.y, -MAX_SPEED, MAX_SPEED)
+
