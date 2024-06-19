@@ -62,4 +62,4 @@ A licença utilizada para este projeto é a MIT, veja-a [aqui](LICENSE)
 
 
 
-* Professor: **Ricardo Ivonei de Almeida**
+* Professor: **Ricardo Ivonei Almeida**
